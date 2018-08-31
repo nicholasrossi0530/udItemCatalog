@@ -13,6 +13,7 @@ class Genre(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+    user_id = Column(String(250), nullable=False)
 
     @property
     def serialize(self):
@@ -20,6 +21,7 @@ class Genre(Base):
         return {
             'name': self.name,
             'id': self.id,
+            'user_id': self.user_id,
         }
 
 
@@ -34,6 +36,7 @@ class Artist(Base):
     labels = Column(String(250))
     associated_acts = Column(String(250))
     genre_id = Column(Integer, ForeignKey('genre.id'))
+    user_id = Column(String(250), nullable=False)
     genre = relationship(Genre)
 
     @property
@@ -46,6 +49,7 @@ class Artist(Base):
             'instrument': self.instrument,
             'labels': self.labels,
             'associated_acts': self.associated_acts,
+            'user_id': self.user_id,
         }
 
 

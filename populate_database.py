@@ -13,7 +13,8 @@ session = DBSession()
 
 # Category: Jazz
 genreJazz = Genre(
-    name = "Jazz"
+    name = "Jazz",
+    user_id = "root",
 )
 session.add(genreJazz)
 session.commit()
@@ -24,6 +25,7 @@ artistJazz1 = Artist(
     instrument = "Saxophone",
     labels = "Young Turks, XL, Brainfeeder",
     associated_acts = "Flying Lotus, Ibeyi, Kendrick Lamar, Run the Jewels, Thundercat",
+    user_id = "root",
     genre = genreJazz
 )
 session.add(artistJazz1)
@@ -35,6 +37,7 @@ artistJazz2 = Artist(
     instrument = "Piano",
     labels = "Warner Bros., Nonesuch",
     associated_acts = "Joshua Redman, Mark Guiliana, Chris Thile, Kurt Rosenwinkel",
+    user_id = "root",
     genre = genreJazz
 )
 session.add(artistJazz2)
@@ -46,6 +49,7 @@ artistJazz3 = Artist(
     instrument = "Piano",
     labels = "Columbia, Blue Note, Warner Bros., Verve",
     associated_acts = "Clark Terry, Miles Davis Quintet, Wayne Shorter, Chick Corea, the Headhunters, V.S.O.P., Jaco Pastorius, Joni Mitchell, Howard Jones",
+    user_id = "root",
     genre = genreJazz
 )
 session.add(artistJazz3)
@@ -57,6 +61,7 @@ artistJazz4 = Artist(
     instrument = "Piano",
     labels = "ECM, Polydor, Stretch, Warner Bros.",
     associated_acts = "Miles Davis, Circle, Return to Forever, Chick Corea Elektric Band, Chick Corea's Akoustic Band, Five Peace Band, Gary Burton",
+    user_id = "root",
     genre = genreJazz
 )
 session.add(artistJazz4)

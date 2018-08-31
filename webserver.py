@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, request
+from flask import redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Genre, Artist
@@ -26,6 +27,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -33,6 +35,7 @@ def showLogin():
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -86,8 +89,9 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'),
+            200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -112,7 +116,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius:\
+    150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print("done!")
     return output
@@ -127,67 +132,76 @@ def gdisconnect():
     print('User name is: ')
     print(login_session['username'])
     if access_token is None:
-     	print('Access Token is None')
-       	response = make_response(json.dumps('Current user not connected.'), 401)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+        print('Access Token is None')
+        response = make_response(
+            json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    url = 'https://accounts.google.com/o/\
+    oauth2/revoke?token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print('result is ')
     print(result)
     if result['status'] == '200':
-	del login_session['access_token'] 
-    	del login_session['gplus_id']
-    	del login_session['username']
-    	del login_session['email']
-    	del login_session['picture']
-    	response = make_response(json.dumps('Successfully disconnected.'), 200)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        del login_session['access_token']
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
     else:
-	
-    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+    	response = make_response(
+            json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
-@app.route('/music.json', methods = ['GET', 'POST'])
+
+@app.route('/music.json', methods=['GET', 'POST'])
 def all_music_handler():
     if request.method == 'GET':
         music = session.query(Genre).all()
-        return jsonify(music = [i.serialize for i in music])
-    
+        return jsonify(music=[i.serialize for i in music])
     elif request.method == 'POST':
         name = request.args.get('name', '')
-        music = Genre(name = unicode(name))
+        music = Genre(name=unicode(name))
         session.add(music)
         session.commit()
-        return jsonify(music = music.serialize)
+        return jsonify(music=music.serialize)
 
-@app.route('/music/<int:id>', methods = ['GET','PUT', 'DELETE'])
+
+@app.route('/music/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def music_handler(id):
-  music = session.query(Genre).filter_by(id = id).one()
-  if request.method == 'GET':
-  	return jsonify(music = music.serialize)
-  elif request.method == 'PUT':
+    music = session.query(Genre).filter_by(id=id).one()
+    if request.method == 'GET':
+        return jsonify(music=music.serialize)
+    elif request.method == 'PUT':
         name = request.args.get('name')
         description = request.args.get('description')
         instrument = request.args.get('instrument')
-  	if name:
-  		music.name = name
-  	if description:
-  		music.description = description
-  	if instrument:
-  		music.instrument = instrument
-  	session.commit()
-  	return jsonify(music = music.serialize)
+        if name:
+            music.name = name
+        if description:
+            music.description = description
+        if instrument:
+            music.instrument = instrument
+            session.commit()
+            return jsonify(music=music.serialize)
 
-  elif request.method == 'DELETE':
-  	#DELETE A SPECFIC RESTAURANT
-  	session.delete(music)
-  	session.commit()
-  	return "Genre Deleted"
-        
+    elif request.method == 'DELETE':
+        # DELETE A SPECFIC RESTAURANT
+        session.delete(music)
+        session.commit()
+        return "Genre Deleted"
+
+
+@app.route('/music/JSON')
+def allJSON():
+    genres = session.query(Genre).all()
+    return jsonify(Genres=[i.serialize for i in genres])
+
 
 @app.route('/music/<int:genre_id>/menu/JSON')
 def genreJSON(genre_id):
@@ -198,7 +212,7 @@ def genreJSON(genre_id):
 
 
 # ADD JSON ENDPOINT HERE
-@app.route('/music/<int:genre_id>/menu/JSON')
+@app.route('/music/<int:genre_id>/menu/<int:artist_id>/JSON')
 def artistJSON(genre_id, artist_id):
     artistItem = session.query(Artist).filter_by(id=artist_id).one()
     return jsonify(Artist=artistItem.serialize)
@@ -234,6 +248,12 @@ def editArtistItem(genre_id, artist_id):
     if 'username' not in login_session:
         return redirect('/login')
     editedItem = session.query(Artist).filter_by(id=artist_id).one()
+    if editedItem.user_id != login_session['username']:
+        return "<script>function myFunction() {alert('You\
+        are not authorized to edit this item.\
+        Please create your own item in order\
+        to edit.');window.location.href='/music/1/menu'}\
+        </script><body onload='myFunction()'>"
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
@@ -251,7 +271,8 @@ def editArtistItem(genre_id, artist_id):
     else:
 
         return render_template(
-            'editmenuitem.html', genre_id=genre_id, artist_id=artist_id, item=editedItem)
+            'editmenuitem.html', genre_id=genre_id,
+            artist_id=artist_id, item=editedItem)
 
 
 @app.route('/music/<int:genre_id>/<int:artist_id>/delete',
@@ -260,6 +281,12 @@ def deleteArtistItem(genre_id, artist_id):
     if 'username' not in login_session:
         return redirect('/login')
     itemToDelete = session.query(Artist).filter_by(id=artist_id).one()
+    if itemToDelete.user_id != login_session['username']:
+        return "<script>function myFunction() {alert('You\
+        are not authorized to edit this item.\
+        Please create your own item in order\
+        to edit.');window.location.href='/music/1/menu'}\
+        </script><body onload='myFunction()'>"
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
