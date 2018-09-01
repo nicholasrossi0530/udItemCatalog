@@ -1,5 +1,14 @@
-from flask import Flask, render_template, request
-from flask import redirect, jsonify, url_for, flash
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    jsonify,
+    url_for,
+    flash,
+    make_response,
+    session as login_session
+)
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Genre, Artist
@@ -7,11 +16,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
-from flask import make_response
 import requests
 
 # New imports for this step
-from flask import session as login_session
 import random
 import string
 
@@ -109,6 +116,7 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    login_session['user_id'] = data['user_id'] if data['user_id'] else null
 
     output = ''
     output += '<h1>Welcome, '
@@ -154,7 +162,7 @@ def gdisconnect():
         return response
     else:
     	response = make_response(
-            json.dumps('Failed to revoke token for given user.', 400))
+        json.dumps('Failed to revoke token for given user.'), 400)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -259,12 +267,6 @@ def editArtistItem(genre_id, artist_id):
             editedItem.name = request.form['name']
         if request.form['description']:
             editedItem.description = request.form['description']
-        # if request.form['instrument']:
-        #     editedItem.instrument = request.form['instrument']
-        # if request.form['labels']:
-        #     editedItem.course = request.form['labels']
-        # if request.form['associated_acts']:
-        #     editedItem.course = request.form['associated_acts']
         session.add(editedItem)
         session.commit()
         return redirect(url_for('genreArtists', genre_id=genre_id))
