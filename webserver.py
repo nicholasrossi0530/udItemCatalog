@@ -162,7 +162,7 @@ def gdisconnect():
         return response
     else:
     	response = make_response(
-        json.dumps('Failed to revoke token for given user.'), 400)
+            json.dumps('Failed to revoke token for given user.'), 400)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -242,7 +242,9 @@ def newArtist(genre_id):
         return redirect('/login')
     if request.method == 'POST':
         newItem = Artist(name=request.form['name'], description=request.form[
-                           'description'], genre_id=genre_id, user_id=login_session['username'])
+                        'description'],
+                        genre_id=genre_id,
+                        user_id=login_session['username'])
         session.add(newItem)
         session.commit()
         return redirect(url_for('genreArtists', genre_id=genre_id))
